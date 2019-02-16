@@ -4,7 +4,10 @@ const app = express();
 
 app.get('/api/me', (req, res) => {
   // TODO return data about the currently authenticated user.
-  res.send('hello world');
+  res.json({
+    authenticated: true,
+    id: 'foo'
+  });
 });
 
-app.listen(8080);
+app.listen(4000);
