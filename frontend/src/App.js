@@ -1,19 +1,28 @@
 import React, {useState, useEffect} from 'react';
 import dotenv from "dotenv";
 import './App.css';
+import { withCookies, Cookies } from 'react-cookie'
 // import GitHubLogin from 'react-github-login';
 
 
 dotenv.config()
 
+const cookies = new Cookies();
 
 
-const App = () => {
+const App = (props) => {
+  const { cookies } = props; 
+  let accessToken =  cookies.get('token') ||  null;
+  
+  // alert(accessToken);
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
+  const [error, setError] = useState(null);
+  const [token, setToken] = useState(accessToken);
 
 
   useEffect(() => {
+
+
 
     //event listener for getting data back from popup
 
@@ -21,15 +30,19 @@ const App = () => {
 
       // checking access code available or not
 
-        if(event.data != "" || event.data !== undefined){
+        if(!event.data.includes("setImmediate")){
       
           // storing code 
-          let code = event.data;
-          
+          // let code =
+          //  if(event.data.includes("setImmediate")){
+          //    alert();
+          //  }
+
+
           // create data variable to send in api
 
           let data = {
-            code: code
+            code:event.data
           };
 
           // api for getting jwt token from backend api
@@ -41,15 +54,16 @@ const App = () => {
                   'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(data)
-            }).then(function(response) {
-              return response.json();
-            }).then(function(data) {
+            }).then(response => response.json())
+            .then(function(data) {
 
-                // chekcing data contains token or not
+                // checking data contains token or not
                 if(data.token){
-
+                  console.log(data.token);
                   // setting token
                   setToken(data.token)
+                  cookies.set('token', data.token, { path: '/' });
+
 
                   // try to call api again after getting token
                   fetch('/api/me',{ 
@@ -60,7 +74,10 @@ const App = () => {
                   })
                   .then(response => response.json())
                   .then(setUser)
-                  .catch(error => console.log('error============:', error));
+                  .catch(error => {
+                      setError(error);
+                      console.log('error============:', error)
+                    });
       
                 }
 
@@ -71,10 +88,18 @@ const App = () => {
 
 
     // calling api to check token authentication wokring or not
-      fetch('/api/me')
+      fetch('/api/me',{ 
+                          method: "GET",
+                          headers: {
+                                    'Authorization': `token ${token}`
+                                  }
+                  })
         .then(response => response.json())
         .then(setUser)
-        .catch(error => console.log('error============:', error));
+        .catch(error => {
+          setError(error);
+          console.log('error============:', error)
+        });
 
 
   }, []);
@@ -108,32 +133,42 @@ const App = () => {
 
   };
 
+  // function for handle user logout
+  const handleLogout = (props) => {
+      // const { cookies } = this.props;
+
+      let accessToken = cookies.remove('token');
+      setToken(accessToken);
+      setUser(null);
+  };
+
 
  // function to open popup window at center
 
   const PopupCenter = (url, title, w, h)  => {
     // Fixes dual-screen position                         Most browsers      Firefox
-    var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : window.screenX;
-    var dualScreenTop = window.screenTop != undefined ? window.screenTop : window.screenY;
+    const dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : window.screenX;
+    const dualScreenTop = window.screenTop != undefined ? window.screenTop : window.screenY;
 
-    var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : window.screen.width;
-    var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : window.screen.height;
+    const width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : window.screen.width;
+    const height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : window.screen.height;
 
-    var systemZoom = width / window.screen.availWidth;
-var left = (width - w) / 2 / systemZoom + dualScreenLeft
-var top = (height - h) / 2 / systemZoom + dualScreenTop
-    var newWindow = window.open(url, title, 'scrollbars=yes, width=' + w / systemZoom + ', height=' + h / systemZoom + ', top=' + top + ', left=' + left);
+    const systemZoom = width / window.screen.availWidth;
+    const left = (width - w) / 2 / systemZoom + dualScreenLeft
+    const top = (height - h) / 2 / systemZoom + dualScreenTop
+    const newWindow = window.open(url, title, 'scrollbars=yes, width=' + w / systemZoom + ', height=' + h / systemZoom + ', top=' + top + ', left=' + left);
 
     // Puts focus on the newWindow
     if (window.focus) newWindow.focus();
-    let interval = setInterval(() => {
+    const interval = setInterval(() => {
       
       if(newWindow.location.pathname === 'blank'){
         return
       }
 
       if(newWindow.location.search){
-         let search = newWindow.location.search.split('=');
+         const search = newWindow.location.search.split('=');
+        //  console.log("h"+search)
          window.postMessage(search[1]);     
 
          clearInterval(interval);
@@ -155,7 +190,7 @@ var top = (height - h) / 2 / systemZoom + dualScreenTop
                 ? 'Authenticated id: ' + user.id
                 : 'Not authenticated.'}
             </p>
-            <button >{user.authenticated ? 'Sign out' : 'Sign in'}</button>
+            <button onClick={() => handleLogout()}> Sign out</button>
           </>
         ) : <button onClick={() => handleLogin(`https://github.com/login/oauth/authorize?client_id=${process.env.REACT_APP_GITHUB_CLIENT}`,'github-oauth-authorize')}>{'Sign in'}</button>}
         <br/>
@@ -172,4 +207,4 @@ var top = (height - h) / 2 / systemZoom + dualScreenTop
   );
 };
 
-export default App;
+export default withCookies(App);
