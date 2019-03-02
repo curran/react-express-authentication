@@ -1,11 +1,9 @@
 import React, {useState, useEffect} from 'react';
 import dotenv from 'dotenv';
 import './App.css';
-import {withCookies, Cookies} from 'react-cookie';
+import {withCookies} from 'react-cookie';
 
 dotenv.config();
-
-const cookies = new Cookies();
 
 const App = props => {
   const {cookies} = props;
@@ -14,6 +12,10 @@ const App = props => {
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
   const [token, setToken] = useState(accessToken);
+
+  if(error){
+    console.log(error);
+  }
 
   useEffect(() => {
     //event listener for getting data back from popup
@@ -58,10 +60,7 @@ const App = props => {
               })
                 .then(response => response.json())
                 .then(setUser)
-                .catch(error => {
-                  setError(error);
-                  console.log('error============:', error);
-                });
+                .catch(setError);
             }
           });
       }
@@ -84,7 +83,7 @@ const App = props => {
 
   // function for github login
   const handleLogin = (url, id) => {
-    const op = PopupCenter(url, id, 600, 1000);
+    PopupCenter(url, id, 600, 1000);
   };
 
   // function for handle user logout
@@ -100,9 +99,9 @@ const App = props => {
   const PopupCenter = (url, title, w, h) => {
     // Fixes dual-screen position                         Most browsers      Firefox
     const dualScreenLeft =
-      window.screenLeft != undefined ? window.screenLeft : window.screenX;
+      window.screenLeft !== undefined ? window.screenLeft : window.screenX;
     const dualScreenTop =
-      window.screenTop != undefined ? window.screenTop : window.screenY;
+      window.screenTop !== undefined ? window.screenTop : window.screenY;
 
     const width = window.innerWidth
       ? window.innerWidth
@@ -140,9 +139,7 @@ const App = props => {
 
       if (newWindow.location.search) {
         const search = newWindow.location.search.split('=');
-        //  console.log("h"+search)
         window.postMessage(search[1]);
-
         clearInterval(interval);
       }
 
