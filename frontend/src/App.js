@@ -2,7 +2,6 @@ import React, {useState, useEffect} from 'react';
 import dotenv from 'dotenv';
 import './App.css';
 import {withCookies, Cookies} from 'react-cookie';
-// import GitHubLogin from 'react-github-login';
 
 dotenv.config();
 
@@ -12,7 +11,6 @@ const App = props => {
   const {cookies} = props;
   let accessToken = cookies.get('token') || null;
 
-  // alert(accessToken);
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
   const [token, setToken] = useState(accessToken);
@@ -24,15 +22,9 @@ const App = props => {
       // checking access code available or not
 
       if (!event.data.includes('setImmediate')) {
-        // storing code
-        // let code =
-        //  if(event.data.includes("setImmediate")){
-        //    alert();
-        //  }
 
         // create data variable to send in api
-
-        let data = {
+        const data = {
           code: event.data,
         };
 
@@ -47,7 +39,7 @@ const App = props => {
           body: JSON.stringify(data),
         })
           .then(response => response.json())
-          .then(function(data) {
+          .then(data => {
             // checking data contains token or not
             if (data.token) {
               // storing return token in variable to resolve passing null to token
@@ -75,7 +67,7 @@ const App = props => {
       }
     });
 
-    // calling api to check token authentication wokring or not
+    // calling api to check token authentication working or not
     fetch('/api/me', {
       method: 'GET',
       headers: {
@@ -90,26 +82,6 @@ const App = props => {
       });
   }, []);
 
-  // // getting success data after github login
-  // const onSuccess = response => {
-  // //   console.log(response)
-  // //  axios.post('/api/github/token', {
-  // //   code:response.code
-  // //   })
-  // //   .then((response) => {
-  // //     // console token
-  // //     console.log(response.data);
-
-  // //   })
-  // //   .catch((error) => {
-  // //     console.error(error)
-  // //   });
-
-  // };
-
-  // failure data in case login fails
-  // const onFailure = response => console.error(response);
-
   // function for github login
   const handleLogin = (url, id) => {
     const op = PopupCenter(url, id, 600, 1000);
@@ -117,8 +89,6 @@ const App = props => {
 
   // function for handle user logout
   const handleLogout = props => {
-    // const { cookies } = this.props;
-
     let accessToken = cookies.remove('token');
     setToken(accessToken);
     setUser({
@@ -127,7 +97,6 @@ const App = props => {
   };
 
   // function to open popup window at center
-
   const PopupCenter = (url, title, w, h) => {
     // Fixes dual-screen position                         Most browsers      Firefox
     const dualScreenLeft =
@@ -217,12 +186,6 @@ const App = props => {
           alt="#">
           github
         </a>
-        {/*  use github login package for proper view and getting data back coded in back end  */}
-        <br />
-        {/* <GitHubLogin clientId={process.env.REACT_APP_GITHUB_CLIENT}
-          onSuccess={onSuccess}
-          onFailure={onFailure}
-          redirectUri="/github/callback"/> */}
       </header>
     </div>
   );
