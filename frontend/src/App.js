@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import dotenv from "dotenv";
-import "./App.css";
-import { withCookies, Cookies } from "react-cookie";
+import React, {useState, useEffect} from 'react';
+import dotenv from 'dotenv';
+import './App.css';
+import {withCookies, Cookies} from 'react-cookie';
 // import GitHubLogin from 'react-github-login';
 
 dotenv.config();
@@ -9,8 +9,8 @@ dotenv.config();
 const cookies = new Cookies();
 
 const App = props => {
-  const { cookies } = props;
-  let accessToken = cookies.get("token") || null;
+  const {cookies} = props;
+  let accessToken = cookies.get('token') || null;
 
   // alert(accessToken);
   const [user, setUser] = useState(null);
@@ -20,10 +20,10 @@ const App = props => {
   useEffect(() => {
     //event listener for getting data back from popup
 
-    window.addEventListener("message", function(event) {
+    window.addEventListener('message', function(event) {
       // checking access code available or not
 
-      if (!event.data.includes("setImmediate")) {
+      if (!event.data.includes('setImmediate')) {
         // storing code
         // let code =
         //  if(event.data.includes("setImmediate")){
@@ -33,18 +33,18 @@ const App = props => {
         // create data variable to send in api
 
         let data = {
-          code: event.data
+          code: event.data,
         };
 
         // api for getting jwt token from backend api
 
-        fetch("/api/github/token", {
-          method: "POST",
+        fetch('/api/github/token', {
+          method: 'POST',
           headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json"
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
           },
-          body: JSON.stringify(data)
+          body: JSON.stringify(data),
         })
           .then(response => response.json())
           .then(function(data) {
@@ -55,20 +55,20 @@ const App = props => {
 
               // setting token
               setToken(data.token);
-              cookies.set("token", data.token, { path: "/" });
+              cookies.set('token', data.token, {path: '/'});
 
               // try to call api again after getting token
-              fetch("/api/me", {
-                method: "GET",
+              fetch('/api/me', {
+                method: 'GET',
                 headers: {
-                  Authorization: `token ${token}`
-                }
+                  Authorization: `token ${token}`,
+                },
               })
                 .then(response => response.json())
                 .then(setUser)
                 .catch(error => {
                   setError(error);
-                  console.log("error============:", error);
+                  console.log('error============:', error);
                 });
             }
           });
@@ -76,17 +76,17 @@ const App = props => {
     });
 
     // calling api to check token authentication wokring or not
-    fetch("/api/me", {
-      method: "GET",
+    fetch('/api/me', {
+      method: 'GET',
       headers: {
-        Authorization: `token ${token}`
-      }
+        Authorization: `token ${token}`,
+      },
     })
       .then(response => response.json())
       .then(setUser)
       .catch(error => {
         setError(error);
-        console.log("error============:", error);
+        console.log('error============:', error);
       });
   }, []);
 
@@ -119,10 +119,10 @@ const App = props => {
   const handleLogout = props => {
     // const { cookies } = this.props;
 
-    let accessToken = cookies.remove("token");
+    let accessToken = cookies.remove('token');
     setToken(accessToken);
     setUser({
-      authenticated: false
+      authenticated: false,
     });
   };
 
@@ -152,25 +152,25 @@ const App = props => {
     const newWindow = window.open(
       url,
       title,
-      "scrollbars=yes, width=" +
+      'scrollbars=yes, width=' +
         w / systemZoom +
-        ", height=" +
+        ', height=' +
         h / systemZoom +
-        ", top=" +
+        ', top=' +
         top +
-        ", left=" +
-        left
+        ', left=' +
+        left,
     );
 
     // Puts focus on the newWindow
     if (window.focus) newWindow.focus();
     const interval = setInterval(() => {
-      if (newWindow.location.pathname === "blank") {
+      if (newWindow.location.pathname === 'blank') {
         return;
       }
 
       if (newWindow.location.search) {
-        const search = newWindow.location.search.split("=");
+        const search = newWindow.location.search.split('=');
         //  console.log("h"+search)
         window.postMessage(search[1]);
 
@@ -188,8 +188,8 @@ const App = props => {
           <>
             <p>
               {user.authenticated
-                ? "Authenticated id: " + user.id
-                : "Not authenticated."}
+                ? 'Authenticated id: ' + user.id
+                : 'Not authenticated.'}
             </p>
             {user.authenticated ? (
               <button onClick={() => handleLogout()}> Sign out</button>
@@ -200,11 +200,10 @@ const App = props => {
                     `https://github.com/login/oauth/authorize?client_id=${
                       process.env.REACT_APP_GITHUB_CLIENT
                     }`,
-                    "github-oauth-authorize"
+                    'github-oauth-authorize',
                   )
-                }
-              >
-                {"Sign in"}
+                }>
+                {'Sign in'}
               </button>
             )}
           </>
@@ -215,8 +214,7 @@ const App = props => {
           href={`https://github.com/login/oauth/authorize?client_id=${
             process.env.REACT_APP_GITHUB_CLIENT
           }`}
-          alt="#"
-        >
+          alt="#">
           github
         </a>
         {/*  use github login package for proper view and getting data back coded in back end  */}
