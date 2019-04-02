@@ -5,6 +5,11 @@ import bodyParser from 'body-parser';
 import jwt from 'jsonwebtoken';
 import fetch from 'node-fetch';
 
+// Example .env file:
+// GITHUB_CLIENT=53275047328975489118
+// GITHUB_SECRET=b767374328905748392075849032785904732890
+// JWT_SECRET=475849037589089432
+
 dotenv.config();
 
 const app = express();
@@ -14,7 +19,7 @@ app.use(bodyParser.json());
 app.get('/api/get/data', (re, res) => {
   let token =
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoidGVzdCIsImlkIjoiZGF0YS5pZCIsImlhdCI6MTU1MTI4NTE2NSwiZXhwIjoxNTUxMzcxNTY1fQ.e-0SBtbKYz5K7QAK9hDtfg0QFgf8cqsF365lco_0sm8';
-  let details = jwt.verify(token, process.env.SECERT, {
+  let details = jwt.verify(token, process.env.JWT_SECRET, {
     ignoreExpiration: true,
   });
 
@@ -25,7 +30,7 @@ app.get('/api/get/data', (re, res) => {
 
 app.get('/api/me', verifyToken, (req, res) => {
   // decode jwt to get data from it
-  const details = jwt.verify(req.token, process.env.SECERT, {
+  const details = jwt.verify(req.token, process.env.JWT_SECRET, {
     ignoreExpiration: true,
   });
 
@@ -86,7 +91,7 @@ app.post('/api/github/token', cors(), (req, res, next) => {
           // generating jwt token with expired in 24 hour and sending to front
           jwt.sign(
             user,
-            process.env.SECERT,
+            process.env.JWT_SECRET,
             {expiresIn: 60 * 60 * 24},
             (err, token) => {
               res.json({
